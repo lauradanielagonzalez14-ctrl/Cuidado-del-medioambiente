@@ -78,6 +78,31 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        /* --- OVERLAY DE INTRODUCCIÓN / PRECARGA --- */
+        #intro-overlay {
+            background: radial-gradient(circle at 50% 30%, rgba(45, 106, 79, 0.95), rgba(13, 36, 28, 0.98));
+            transition: opacity 0.7s ease;
+        }
+        #intro-overlay.intro-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #intro-spinner {
+            width: 56px;
+            height: 56px;
+            border: 5px solid rgba(255, 255, 255, 0.25);
+            border-top-color: #95d5b2;
+            border-radius: 50%;
+            animation: intro-spin 0.9s linear infinite;
+        }
+        @keyframes intro-spin {
+            to { transform: rotate(360deg); }
+        }
+        #intro-start-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            transform: none;
+        }
         /* Barra de progreso animada en el video simulado */
         .video-wave {
             animation: wave 1.2s infinite ease-in-out;
@@ -89,6 +114,55 @@
     </style>
 </head>
 <body class="text-slate-800 select-none pb-14">
+
+    <!-- ========================================================= -->
+    <!-- OVERLAY DE INTRODUCCIÓN CON PRECARGA Y VIDEO INTRODUCTORIO -->
+    <!-- ========================================================= -->
+    <div id="intro-overlay" class="fixed inset-0 z-[60] flex items-center justify-center p-4 text-white text-center">
+
+        <!-- Elemento de video introductorio (se muestra al presionar Comenzar) -->
+        <video id="intro-video" class="hidden absolute inset-0 w-full h-full object-contain bg-black"
+               src="video%201.mp4" playsinline preload="auto"></video>
+
+        <!-- Control para saltar la introducción mientras el video se reproduce -->
+        <button id="intro-skip-btn"
+                class="hidden btn-bounce absolute top-5 right-5 z-[61] bg-white/15 hover:bg-white/30 border border-white/40 text-white font-title font-semibold text-sm px-4 py-2 rounded-xl backdrop-blur-sm">
+            Saltar intro ⏭️
+        </button>
+
+        <!-- Estado de precarga + estado de inicio -->
+        <div id="intro-panel" class="eco-glass relative z-[61] max-w-md w-full rounded-3xl p-8 sm:p-10 text-slate-800 border border-white/80">
+            <div class="text-6xl mb-4 animate-float">🌍🌱</div>
+            <h2 class="font-title text-2xl sm:text-3xl font-extrabold text-[#1b4332] mb-2">Guardianes del Planeta</h2>
+
+            <!-- Estado: CARGANDO -->
+            <div id="intro-loading" class="flex flex-col items-center gap-4 mt-4">
+                <div id="intro-spinner"></div>
+                <p class="text-slate-600 font-medium">Cargando experiencia...</p>
+            </div>
+
+            <!-- Estado: LISTO PARA COMENZAR (oculto hasta que termine la precarga) -->
+            <div id="intro-ready" class="hidden flex-col items-center gap-4 mt-4">
+                <p class="text-slate-600 text-sm sm:text-base">Vive una introducción en video antes de iniciar tu aventura ecológica.</p>
+                <button id="intro-start-btn"
+                        class="btn-bounce bg-[#1b4332] hover:bg-[#2d6a4f] text-white font-title text-lg font-semibold px-8 py-3.5 rounded-xl shadow-lg shadow-[#1b4332]/30 inline-flex items-center gap-3"
+                        disabled>
+                    <span>Comenzar</span> <span>▶️</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio de fondo (música ambiental en bucle) y audio del podcast -->
+    <audio id="bg-music" src="Audio%201.mpeg" loop preload="auto"></audio>
+    <audio id="podcast-audio" src="podcast%201.mpeg" preload="none"></audio>
+
+    <!-- Botón flotante para silenciar / activar la música de fondo -->
+    <button id="bg-music-toggle" onclick="toggleBgMusic()"
+            class="hidden fixed bottom-4 right-4 z-40 btn-bounce bg-[#1b4332] hover:bg-[#2d6a4f] text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center text-xl"
+            title="Silenciar o activar la música de fondo" aria-label="Música de fondo">
+        🔊
+    </button>
 
     <!-- ENCABEZADO FLOTANTE MODERNO Y BARRA DE PROGRESO DEL GUARDIÁN -->
     <div class="sticky top-3 z-40 px-3 sm:px-6 max-w-6xl mx-auto">
@@ -306,6 +380,13 @@
                     <span class="bg-[#e8f0ec] text-[#1b4332] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Paisajes Sonoros</span>
                     <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1.5 mb-2">🎧 ¿Cómo suena nuestro planeta?</h2>
                     <p class="text-slate-600 mb-6">Selecciona cada tarjeta para escuchar el sonido ambiental y su reflexión ecológica.</p>
+
+                    <!-- Botón del podcast ambiental -->
+                    <div class="mb-6">
+                        <button onclick="togglePodcast()" id="podcast-btn" class="btn-bounce bg-[#2b5975] hover:bg-[#20445a] text-white font-semibold px-5 py-3 rounded-xl flex items-center gap-2.5 text-sm shadow-sm">
+                            <span id="podcast-icon">🎙️</span> <span id="podcast-label">podcast</span>
+                        </button>
+                    </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <!-- Audio 1 -->
@@ -902,6 +983,121 @@
                 fb.textContent = `⚠️ Ese no es el contenedor adecuado. Inténtalo nuevamente.`;
                 fb.className = "text-sm font-bold text-rose-700 mt-2 h-6";
             }
+        }
+
+        // ===========================================================
+        // OVERLAY DE INTRODUCCIÓN: PRECARGA, VIDEO Y MÚSICA DE FONDO
+        // ===========================================================
+        const introOverlay = document.getElementById('intro-overlay');
+        const introVideo = document.getElementById('intro-video');
+        const introLoading = document.getElementById('intro-loading');
+        const introReady = document.getElementById('intro-ready');
+        const introStartBtn = document.getElementById('intro-start-btn');
+        const introSkipBtn = document.getElementById('intro-skip-btn');
+        const bgMusic = document.getElementById('bg-music');
+        const bgMusicToggle = document.getElementById('bg-music-toggle');
+        const podcastAudio = document.getElementById('podcast-audio');
+
+        let introReadyShown = false;
+
+        // Configuración inicial de la música de fondo (volumen moderado)
+        if (bgMusic) bgMusic.volume = 0.3;
+
+        // Cambia del estado "Cargando" al estado "Comenzar" y habilita el botón.
+        function showIntroReady() {
+            if (introReadyShown) return;
+            introReadyShown = true;
+            if (introLoading) introLoading.classList.add('hidden');
+            if (introReady) {
+                introReady.classList.remove('hidden');
+                introReady.classList.add('flex');
+            }
+            if (introStartBtn) introStartBtn.disabled = false;
+        }
+
+        // La precarga depende del video introductorio. No se bloquea en el audio
+        // (Audio 1.mpeg es un marcador de 2 bytes y puede no disparar canplaythrough).
+        if (introVideo) {
+            introVideo.addEventListener('loadeddata', showIntroReady);
+            introVideo.addEventListener('canplaythrough', showIntroReady);
+            introVideo.addEventListener('error', showIntroReady);
+        } else {
+            showIntroReady();
+        }
+        // Respaldo por tiempo: el botón siempre termina habilitándose.
+        setTimeout(showIntroReady, 6000);
+
+        // Al presionar "Comenzar": reproducir el video y arrancar la música de fondo
+        // desde el gesto del usuario (requisito de las políticas de autoplay).
+        if (introStartBtn) {
+            introStartBtn.addEventListener('click', function() {
+                if (introPanel()) introPanel().classList.add('hidden');
+                if (introVideo) {
+                    introVideo.classList.remove('hidden');
+                    introVideo.play().catch(function() { endIntro(); });
+                }
+                if (introSkipBtn) introSkipBtn.classList.remove('hidden');
+
+                // Iniciar música de fondo (puede ser silenciosa si el archivo está vacío).
+                if (bgMusic) {
+                    bgMusic.play().catch(function() {});
+                }
+                if (bgMusicToggle) bgMusicToggle.classList.remove('hidden');
+            });
+        }
+
+        function introPanel() {
+            return document.getElementById('intro-panel');
+        }
+
+        // Finaliza la introducción y revela la experiencia interactiva.
+        function endIntro() {
+            if (!introOverlay) return;
+            introOverlay.classList.add('intro-hidden');
+            if (introVideo) {
+                try { introVideo.pause(); } catch (e) {}
+            }
+            setTimeout(function() {
+                if (introOverlay) introOverlay.style.display = 'none';
+            }, 750);
+        }
+
+        if (introVideo) introVideo.addEventListener('ended', endIntro);
+        if (introSkipBtn) introSkipBtn.addEventListener('click', endIntro);
+
+        // Alterna silenciar / activar la música de fondo.
+        function toggleBgMusic() {
+            if (!bgMusic) return;
+            if (bgMusic.paused || bgMusic.muted) {
+                bgMusic.muted = false;
+                bgMusic.play().catch(function() {});
+                if (bgMusicToggle) bgMusicToggle.textContent = '🔊';
+            } else {
+                bgMusic.muted = true;
+                if (bgMusicToggle) bgMusicToggle.textContent = '🔇';
+            }
+        }
+
+        // ===========================================================
+        // PODCAST: reproducir / pausar el audio del podcast
+        // ===========================================================
+        function togglePodcast() {
+            if (!podcastAudio) return;
+            const icon = document.getElementById('podcast-icon');
+            if (podcastAudio.paused) {
+                podcastAudio.play().then(function() {
+                    if (icon) icon.textContent = '⏸️';
+                }).catch(function() {});
+            } else {
+                podcastAudio.pause();
+                if (icon) icon.textContent = '🎙️';
+            }
+        }
+        if (podcastAudio) {
+            podcastAudio.addEventListener('ended', function() {
+                const icon = document.getElementById('podcast-icon');
+                if (icon) icon.textContent = '🎙️';
+            });
         }
 
         // --- INICIALIZACIÓN AL CARGAR LA PÁGINA ---
