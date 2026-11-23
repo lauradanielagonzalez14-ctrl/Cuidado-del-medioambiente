@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guardianes del Planeta 🌍 | Aventura Ecológica</title>
+    <!-- Tailwind CSS para diseño responsivo y utilidades -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Outfit (titulares modernos) e Inter (lectura clara y armónica) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Tone.js para efectos de sonido interactivos sin dependencias externas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Imagen de fondo impactante de un ecosistema natural con contraste equilibrado */
+            background-image: linear-gradient(to bottom, rgba(13, 36, 28, 0.22), rgba(15, 23, 42, 0.35)),
+                              url('https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=1920&q=85');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-color: #0d241c;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, .font-title {
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: -0.02em;
+        }
+        /* Efecto cristalino moderno y sobrio (Glassmorphism) */
+        .eco-glass {
+            background: rgba(250, 252, 251, 0.86);
+            backdrop-filter: blur(16px) saturate(125%);
+            -webkit-backdrop-filter: blur(16px) saturate(125%);
+            box-shadow: 0 20px 40px -15px rgba(10, 25, 20, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+        }
+        /* Animaciones sutiles y fluidas */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+        .btn-bounce {
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        }
+        .btn-bounce:hover {
+            transform: translateY(-2px);
+        }
+        .btn-bounce:active {
+            transform: scale(0.98);
+        }
+        /* Estilo moderno y limpio para tarjetas interactivas */
+        .game-card {
+            transition: all 0.25s ease;
+            border-bottom-width: 3px;
+        }
+        .game-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 30px -10px rgba(13, 36, 28, 0.22);
+        }
+        .tab-active {
+            background: linear-gradient(135deg, #1b4332, #2d6a4f);
+            color: #ffffff !important;
+            border-color: #1b4332 !important;
+            box-shadow: 0 6px 16px -4px rgba(27, 67, 50, 0.45);
+        }
+        /* Ocultar secciones inactivas */
+        .section-panel {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        .section-panel.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Barra de progreso animada en el video simulado */
+        .video-wave {
+            animation: wave 1.2s infinite ease-in-out;
+        }
+        @keyframes wave {
+            0%, 100% { height: 10px; }
+            50% { height: 28px; }
+        }
+    </style>
+</head>
+<body class="text-slate-800 select-none pb-14">
+
+    <!-- ENCABEZADO FLOTANTE MODERNO Y BARRA DE PROGRESO DEL GUARDIÁN -->
+    <div class="sticky top-3 z-40 px-3 sm:px-6 max-w-6xl mx-auto">
+        <header class="bg-white/90 backdrop-blur-xl shadow-lg rounded-2xl border border-white/80 px-4 sm:px-6 py-3">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <!-- Logo e Identidad -->
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 bg-gradient-to-br from-[#1b4332] to-[#2d6a4f] rounded-xl flex items-center justify-center text-2xl shadow-md">
+                        🌍
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-xl font-bold text-[#1b4332] leading-tight">
+                            Guardianes del Planeta
+                        </h1>
+                        <p class="text-xs font-medium text-slate-500">Educación Ambiental • Ciencias Naturales</p>
+                    </div>
+                </div>
+
+                <!-- Marcador de Puntos con Paleta Natural -->
+                <div class="flex items-center gap-2.5 bg-[#f4f7f5] border border-[#d8e2dc] px-3.5 py-1.5 rounded-xl">
+                    <span class="text-xl">🌿</span>
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-[#2d6a4f] block leading-none">Eco-Puntos</span>
+                        <span id="score-display" class="text-base font-bold text-[#1b4332] transition-transform inline-block">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MENÚ DE NAVEGACIÓN ESTILIZADO -->
+            <nav class="mt-3 pt-2.5 border-t border-slate-200/80 overflow-x-auto">
+                <div class="flex justify-start sm:justify-center gap-2 min-w-max pb-1">
+                    <button onclick="navigateTo('inicio')" id="nav-inicio" class="nav-btn tab-active px-4 py-2 rounded-xl font-title font-semibold text-xs sm:text-sm flex items-center gap-2 transition-all bg-white text-slate-700 border border-slate-200 hover:bg-[#f0f5f2]">
+                        <span>🧭</span> Inicio
+                    </button>
+                    <button onclick="navigateTo('teoria')" id="nav-teoria" class="nav-btn px-4 py-2 rounded-xl font-title font-semibold text-xs sm:text-sm flex items-center gap-2 transition-all bg-white text-slate-700 border border-slate-200 hover:bg-[#f0f5f2]">
+                        <span>📖</span> 1. Fundamentos
+                    </button>
+                    <button onclick="navigateTo('audiovisual')" id="nav-audiovisual" class="nav-btn px-4 py-2 rounded-xl font-title font-semibold text-xs sm:text-sm flex items-center gap-2 transition-all bg-white text-slate-700 border border-slate-200 hover:bg-[#f0f5f2]">
+                        <span>🎬</span> 2. Audiovisual
+                    </button>
+                    <button onclick="navigateTo('acciones')" id="nav-acciones" class="nav-btn px-4 py-2 rounded-xl font-title font-semibold text-xs sm:text-sm flex items-center gap-2 transition-all bg-white text-slate-700 border border-slate-200 hover:bg-[#f0f5f2]">
+                        <span>🌱</span> 3. Acciones
+                    </button>
+                    <button onclick="navigateTo('juegos')" id="nav-juegos" class="nav-btn px-4 py-2 rounded-xl font-title font-semibold text-xs sm:text-sm flex items-center gap-2 transition-all bg-white text-slate-700 border border-slate-200 hover:bg-[#f0f5f2]">
+                        <span>🎯</span> 4. Desafíos
+                    </button>
+                </div>
+            </nav>
+        </header>
+    </div>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <main class="max-w-5xl mx-auto px-4 pt-7">
+
+        <!-- ========================================================= -->
+        <!-- SECCIÓN 0: BIENVENIDA E INICIO (DISEÑO EDITORIAL MODERNO) -->
+        <!-- ========================================================= -->
+        <section id="sec-inicio" class="section-panel active">
+            <!-- Cabecera Heroica en 2 Columnas -->
+            <div class="eco-glass rounded-3xl p-6 sm:p-10 border border-white/80 mb-6 relative overflow-hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+                    <div class="lg:col-span-8 text-center lg:text-left">
+                        <span class="inline-flex items-center gap-2 bg-[#e8f0ec] text-[#1b4332] font-semibold px-3.5 py-1 rounded-full text-xs uppercase tracking-wider mb-4 border border-[#c7dcd1]">
+                            <span>🌿</span> Programa Interactivo de Conciencia Ambiental
+                        </span>
+                        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-4 leading-tight">
+                            Conviértete en un <span class="text-[#2d6a4f]">Guardián del Planeta</span>
+                        </h2>
+                        <p class="text-base sm:text-lg text-slate-600 mb-7 leading-relaxed">
+                            La Tierra es nuestro hogar compartido. Explora lecturas ilustradas, cápsulas audiovisuales y actividades prácticas para proteger los ecosistemas, el agua y la biodiversidad.
+                        </p>
+                        <button onclick="navigateTo('teoria')" class="btn-bounce bg-[#1b4332] hover:bg-[#2d6a4f] text-white font-title text-base sm:text-lg font-semibold px-7 py-3.5 rounded-xl shadow-lg shadow-[#1b4332]/25 inline-flex items-center gap-3">
+                            <span>Iniciar Recorrido</span>
+                            <span>→</span>
+                        </button>
+                    </div>
+
+                    <!-- Emblema Visual Sobrio y Armónico -->
+                    <div class="lg:col-span-4 flex justify-center">
+                        <div class="bg-gradient-to-br from-[#f4f8f6] to-[#e3eee8] border border-[#c7dcd1] rounded-2xl p-6 text-center shadow-sm w-full max-w-xs">
+                            <div class="text-5xl sm:text-6xl mb-3 animate-float">🌱🐢🌳</div>
+                            <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#1b4332] bg-white/90 py-1.5 px-3.5 rounded-full border border-[#c7dcd1]">
+                                <span class="w-2 h-2 rounded-full bg-[#2d6a4f]"></span>
+                                Ecosistema Vivo
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjetas de Ruta de Aprendizaje con Paleta Natural Coordinada -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 text-left">
+                <div onclick="navigateTo('teoria')" class="md:col-span-7 cursor-pointer game-card eco-glass border border-[#b7d3c6] border-b-[#2d6a4f] rounded-2xl p-6 hover:bg-white flex items-center gap-5">
+                    <div class="text-3xl sm:text-4xl bg-[#e8f0ec] p-4 rounded-xl shrink-0">📖</div>
+                    <div>
+                        <span class="inline-block text-[#2d6a4f] text-xs font-bold uppercase tracking-wider mb-0.5">Módulo 01</span>
+                        <h3 class="font-bold text-slate-900 text-lg">Aprende los Fundamentos</h3>
+                        <p class="text-sm text-slate-600 mt-1">Guía interactiva sobre el equilibrio natural y por qué requiere nuestro cuidado.</p>
+                    </div>
+                </div>
+
+                <div onclick="navigateTo('audiovisual')" class="md:col-span-5 cursor-pointer game-card eco-glass border border-[#bfd7ea] border-b-[#2b5975] rounded-2xl p-6 hover:bg-white flex items-center gap-4">
+                    <div class="text-3xl sm:text-4xl bg-[#e7f0f7] p-4 rounded-xl shrink-0">🎧</div>
+                    <div>
+                        <span class="inline-block text-[#2b5975] text-xs font-bold uppercase tracking-wider mb-0.5">Módulo 02</span>
+                        <h3 class="font-bold text-slate-900 text-lg">Escucha y Observa</h3>
+                        <p class="text-sm text-slate-600 mt-1">Relato animado y paisajes sonoros del planeta.</p>
+                    </div>
+                </div>
+
+                <div onclick="navigateTo('acciones')" class="md:col-span-5 cursor-pointer game-card eco-glass border border-[#e6d5b8] border-b-[#9c6615] rounded-2xl p-6 hover:bg-white flex items-center gap-4">
+                    <div class="text-3xl sm:text-4xl bg-[#f7f1e6] p-4 rounded-xl shrink-0">🌿</div>
+                    <div>
+                        <span class="inline-block text-[#9c6615] text-xs font-bold uppercase tracking-wider mb-0.5">Módulo 03</span>
+                        <h3 class="font-bold text-slate-900 text-lg">Acciones Concretas</h3>
+                        <p class="text-sm text-slate-600 mt-1">Aplica las 3R y cumple compromisos diarios.</p>
+                    </div>
+                </div>
+
+                <div onclick="navigateTo('juegos')" class="md:col-span-7 cursor-pointer game-card eco-glass border border-[#c7dcd1] border-b-[#1b4332] rounded-2xl p-6 hover:bg-white flex items-center gap-5">
+                    <div class="text-3xl sm:text-4xl bg-[#e8f0ec] p-4 rounded-xl shrink-0">🎯</div>
+                    <div>
+                        <span class="inline-block text-[#1b4332] text-xs font-bold uppercase tracking-wider mb-0.5">Módulo 04</span>
+                        <h3 class="font-bold text-slate-900 text-lg">Desafíos Interactivos</h3>
+                        <p class="text-sm text-slate-600 mt-1">Pon a prueba tus conocimientos en la trivia y clasifica residuos.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- SECCIÓN 1: PRESENTACIÓN TEÓRICA INTERACTIVA (DIAPOSITIVAS) -->
+        <!-- ========================================================= -->
+        <section id="sec-teoria" class="section-panel">
+            <div class="eco-glass rounded-3xl p-6 sm:p-8 border border-white/80">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-6 border-b border-slate-200 pb-4">
+                    <div>
+                        <span class="bg-[#e8f0ec] text-[#1b4332] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Módulo Teórico</span>
+                        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1.5">📖 Guía Ilustrada de la Naturaleza</h2>
+                    </div>
+                    <!-- Botón para escuchar la diapositiva actual en voz alta -->
+                    <button onclick="speakCurrentSlide()" class="btn-bounce bg-[#2d6a4f] hover:bg-[#1b4332] text-white font-medium px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm shadow-sm">
+                        <span>🔊</span> Escuchar Lectura
+                    </button>
+                </div>
+
+                <!-- Contenedor de la Diapositiva Activa -->
+                <div id="slide-container" class="bg-white/90 rounded-2xl p-6 sm:p-8 border border-[#d8e2dc] min-h-[300px] flex flex-col justify-between">
+                    <!-- Contenido dinámico inyectado por JS -->
+                </div>
+
+                <!-- Controles de Navegación de Diapositivas -->
+                <div class="flex items-center justify-between mt-6 gap-4">
+                    <button onclick="changeSlide(-1)" id="btn-prev-slide" class="btn-bounce bg-slate-200 hover:bg-slate-300 disabled:opacity-40 text-slate-800 font-semibold px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm">
+                        <span>←</span> Anterior
+                    </button>
+
+                    <!-- Indicadores de página (puntitos) -->
+                    <div id="slide-dots" class="flex gap-2"></div>
+
+                    <button onclick="changeSlide(1)" id="btn-next-slide" class="btn-bounce bg-[#1b4332] hover:bg-[#2d6a4f] text-white font-semibold px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm">
+                        <span>Siguiente</span> <span>→</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- SECCIÓN 2: VIDEOS Y AUDIOS INTERACTIVOS                   -->
+        <!-- ========================================================= -->
+        <section id="sec-audiovisual" class="section-panel">
+            <div class="space-y-8">
+                <!-- VIDEO-CUENTO ANIMADO INTERACTIVO -->
+                <div class="eco-glass rounded-3xl p-6 sm:p-8 border border-white/80">
+                    <span class="bg-[#e7f0f7] text-[#2b5975] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Cápsula Audiovisual</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1.5 mb-2">🎬 Relato Animado: "El Viaje de Gotita"</h2>
+                    <p class="text-slate-600 mb-6">Presiona <strong>Reproducir</strong> para observar y escuchar el recorrido del agua y la importancia de conservarla limpia.</p>
+
+                    <!-- Pantalla de Video Interactivo Simulado con Animación SVG y Narración -->
+                    <div class="bg-slate-900 rounded-2xl overflow-hidden border border-slate-700 shadow-xl">
+                        <div id="video-stage" class="relative h-64 sm:h-80 bg-gradient-to-b from-[#2b5975] to-[#1b4332] flex flex-col items-center justify-center p-6 text-center transition-all duration-700">
+                            <div id="video-emoji" class="text-6xl sm:text-7xl mb-4 transition-transform duration-500">💧</div>
+                            <p id="video-subtitle" class="bg-slate-950/75 text-white px-5 py-3 rounded-xl text-base sm:text-lg font-medium max-w-xl backdrop-blur-sm border border-white/10">
+                                Haz clic en "Reproducir Relato" para iniciar la presentación.
+                            </p>
+                            <!-- Ondas de audio animadas cuando narra -->
+                            <div id="audio-visualizer" class="hidden flex items-end gap-1.5 h-8 mt-4">
+                                <div class="w-1.5 bg-emerald-300 rounded-full video-wave"></div>
+                                <div class="w-1.5 bg-teal-300 rounded-full video-wave" style="animation-delay: 0.2s"></div>
+                                <div class="w-1.5 bg-sky-300 rounded-full video-wave" style="animation-delay: 0.4s"></div>
+                                <div class="w-1.5 bg-amber-300 rounded-full video-wave" style="animation-delay: 0.1s"></div>
+                                <div class="w-1.5 bg-emerald-300 rounded-full video-wave" style="animation-delay: 0.3s"></div>
+                            </div>
+                        </div>
+
+                        <!-- Controles del Reproductor -->
+                        <div class="bg-slate-900 px-6 py-4 flex flex-wrap items-center justify-between gap-4 border-t border-slate-800">
+                            <div class="flex items-center gap-3">
+                                <button onclick="playVideoStory()" id="btn-play-video" class="btn-bounce bg-[#2d6a4f] hover:bg-[#40916c] text-white font-semibold px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm">
+                                    <span>▶️</span> Reproducir Relato
+                                </button>
+                                <button onclick="stopVideoStory()" class="btn-bounce bg-slate-700 hover:bg-slate-600 text-white font-semibold px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm">
+                                    <span>⏹️</span> Detener
+                                </button>
+                            </div>
+                            <div class="text-slate-300 text-sm font-medium">
+                                Escena: <span id="video-scene-counter">0 / 4</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PANEL DE SONIDOS DE LA NATURALEZA (AUDIOS INTERACTIVOS) -->
+                <div class="eco-glass rounded-3xl p-6 sm:p-8 border border-white/80">
+                    <span class="bg-[#e8f0ec] text-[#1b4332] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Paisajes Sonoros</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1.5 mb-2">🎧 ¿Cómo suena nuestro planeta?</h2>
+                    <p class="text-slate-600 mb-6">Selecciona cada tarjeta para escuchar el sonido ambiental y su reflexión ecológica.</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Audio 1 -->
+                        <button onclick="playNatureAudio('bosque')" class="btn-bounce text-left bg-white/95 hover:bg-[#f4f8f6] border border-[#c7dcd1] rounded-2xl p-5 flex items-center gap-4 transition-all shadow-sm">
+                            <div class="text-4xl bg-[#e8f0ec] p-3.5 rounded-xl">🐦</div>
+                            <div>
+                                <h3 class="font-bold text-base text-slate-900">Bosque en Equilibrio</h3>
+                                <p class="text-sm text-slate-600 mt-0.5">El canto de las aves y el viento limpio entre los árboles.</p>
+                                <span class="inline-block mt-2 text-xs font-semibold text-[#2d6a4f]">🔊 Reproducir audio</span>
+                            </div>
+                        </button>
+
+                        <!-- Audio 2 -->
+                        <button onclick="playNatureAudio('rio')" class="btn-bounce text-left bg-white/95 hover:bg-[#f2f7fa] border border-[#bfd7ea] rounded-2xl p-5 flex items-center gap-4 transition-all shadow-sm">
+                            <div class="text-4xl bg-[#e7f0f7] p-3.5 rounded-xl">🏞️</div>
+                            <div>
+                                <h3 class="font-bold text-base text-slate-900">Río Cristalino</h3>
+                                <p class="text-sm text-slate-600 mt-0.5">El agua pura fluye y sostiene la vida de peces y plantas.</p>
+                                <span class="inline-block mt-2 text-xs font-semibold text-[#2b5975]">🔊 Reproducir audio</span>
+                            </div>
+                        </button>
+
+                        <!-- Audio 3 -->
+                        <button onclick="playNatureAudio('ruido')" class="btn-bounce text-left bg-white/95 hover:bg-[#faf6f0] border border-[#e6d5b8] rounded-2xl p-5 flex items-center gap-4 transition-all shadow-sm">
+                            <div class="text-4xl bg-[#f7f1e6] p-3.5 rounded-xl">🚗</div>
+                            <div>
+                                <h3 class="font-bold text-base text-slate-900">Contaminación Acústica</h3>
+                                <p class="text-sm text-slate-600 mt-0.5">El exceso de ruido urbano altera el descanso de la fauna.</p>
+                                <span class="inline-block mt-2 text-xs font-semibold text-[#9c6615]">🔊 Reproducir audio</span>
+                            </div>
+                        </button>
+
+                        <!-- Audio 4 -->
+                        <button onclick="playNatureAudio('reciclaje')" class="btn-bounce text-left bg-white/95 hover:bg-[#f4f8f6] border border-[#c7dcd1] rounded-2xl p-5 flex items-center gap-4 transition-all shadow-sm">
+                            <div class="text-4xl bg-[#e8f0ec] p-3.5 rounded-xl">♻️</div>
+                            <div>
+                                <h3 class="font-bold text-base text-slate-900">Clasificación Correcta</h3>
+                                <p class="text-sm text-slate-600 mt-0.5">Separar los residuos permite transformarlos en nuevos recursos.</p>
+                                <span class="inline-block mt-2 text-xs font-semibold text-[#1b4332]">🔊 Reproducir audio</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- SECCIÓN 3: ACCIONES CONCRETAS DESDE LA CONCIENCIA         -->
+        <!-- ========================================================= -->
+        <section id="sec-acciones" class="section-panel">
+            <div class="eco-glass rounded-3xl p-6 sm:p-8 border border-white/80">
+                <span class="bg-[#f7f1e6] text-[#9c6615] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Conciencia en Acción</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1.5 mb-2">🌱 Hábitos de un Guardián Ambiental</h2>
+                <p class="text-slate-600 mb-6">Cuidar el entorno comienza con decisiones responsables cada día. Marca las acciones que te comprometes a practicar.</p>
+
+                <!-- LAS 3 R EXPLICADAS CON CLARIDAD -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-white/95 border border-[#e6d5b8] rounded-2xl p-5 text-center shadow-sm">
+                        <div class="text-3xl mb-2">📉</div>
+                        <h3 class="font-title text-lg font-bold text-[#9c6615]">1. REDUCIR</h3>
+                        <p class="text-sm text-slate-600 mt-1.5">Evitar el consumo innecesario, como llevar tu propia botella reutilizable en lugar de comprar envases desechables.</p>
+                    </div>
+                    <div class="bg-white/95 border border-[#bfd7ea] rounded-2xl p-5 text-center shadow-sm">
+                        <div class="text-3xl mb-2">🔄</div>
+                        <h3 class="font-title text-lg font-bold text-[#2b5975]">2. REUTILIZAR</h3>
+                        <p class="text-sm text-slate-600 mt-1.5">Darle un segundo uso creativo a los materiales, convirtiendo cajas o frascos en organizadores útiles.</p>
+                    </div>
+                    <div class="bg-white/95 border border-[#c7dcd1] rounded-2xl p-5 text-center shadow-sm">
+                        <div class="text-3xl mb-2">♻️</div>
+                        <h3 class="font-title text-lg font-bold text-[#1b4332]">3. RECICLAR</h3>
+                        <p class="text-sm text-slate-600 mt-1.5">Separar papel, plástico, vidrio y materia orgánica para que puedan procesarse y volver a utilizarse.</p>
+                    </div>
+                </div>
+
+                <!-- CHECKLIST INTERACTIVO DE COMPROMISOS -->
+                <h3 class="font-title text-lg font-bold text-slate-800 mb-4">✅ Mi Lista de Compromisos Diarios (Selecciona para registrar y sumar Eco-Puntos):</h3>
+                <div id="missions-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Generado dinámicamente por JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- SECCIÓN 4: PREGUNTAS Y MINIJUEGOS INTERACTIVOS            -->
+        <!-- ========================================================= -->
+        <section id="sec-juegos" class="section-panel">
+            <div class="space-y-8">
+                
+                <!-- JUEGO 1: TRIVIA DE CONCIENCIA AMBIENTAL -->
+                <div class="eco-glass rounded-3xl p-6 sm:p-8 border border-white/80">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                        <div>
+                            <span class="bg-[#e7f0f7] text-[#2b5975] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Evaluación Interactiva</span>
+                            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1.5">🧠 Trivia de Conciencia Ecológica</h2>
+                        </div>
+                        <span id="quiz-progress" class="bg-white border border-slate-200 font-semibold text-slate-700 px-4 py-1.5 rounded-full text-sm">
+                            Pregunta 1 de 5
+                        </span>
+                    </div>
+
+                    <div id="quiz-box" class="bg-white/95 border border-[#d8e2dc] rounded-2xl p-6">
+                        <!-- Contenido de pregunta dinámica -->
+                    </div>
+                </div>
+
+                <!-- JUEGO 2: CLASIFICADOR DE RESIDUOS (BOTES DE RECICLAJE) -->
+                <div class="eco-glass rounded-3xl p-6 sm:p-8 border border-white/80">
+                    <span class="bg-[#e8f0ec] text-[#1b4332] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Actividad Práctica</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1.5 mb-2">🗑️ Clasificación de Residuos</h2>
+                    <p class="text-slate-600 mb-6">Observa el elemento en pantalla y selecciona el contenedor adecuado para su reciclaje.</p>
+
+                    <!-- Objeto actual a clasificar -->
+                    <div id="sorter-stage" class="bg-white/95 border border-[#d8e2dc] rounded-2xl p-6 text-center mb-6 shadow-sm">
+                        <div id="trash-emoji" class="text-6xl mb-2 animate-float">🍌</div>
+                        <h3 id="trash-name" class="text-xl font-bold text-slate-900">Cáscara de plátano</h3>
+                        <p id="trash-feedback" class="text-sm font-medium text-[#9c6615] mt-2 h-6">¿En qué contenedor debe depositarse?</p>
+                    </div>
+
+                    <!-- 3 Contenedores Interactivos con Paleta Armónica -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <button onclick="checkBin('organico')" class="btn-bounce game-card bg-[#8c5a2b] hover:bg-[#734820] text-white rounded-2xl p-5 text-center border-[#593616] shadow-sm">
+                            <div class="text-3xl mb-1.5">🍎</div>
+                            <div class="font-title text-lg font-bold">ORGÁNICO</div>
+                            <div class="text-xs text-amber-100/90 mt-0.5">Restos de alimentos y plantas</div>
+                        </button>
+
+                        <button onclick="checkBin('plastico')" class="btn-bounce game-card bg-[#2b5975] hover:bg-[#20445a] text-white rounded-2xl p-5 text-center border-[#163040] shadow-sm">
+                            <div class="text-3xl mb-1.5">🧴</div>
+                            <div class="font-title text-lg font-bold">PLÁSTICO Y METALES</div>
+                            <div class="text-xs text-sky-100/90 mt-0.5">Botellas, envases y latas</div>
+                        </button>
+
+                        <button onclick="checkBin('papel')" class="btn-bounce game-card bg-[#2d6a4f] hover:bg-[#1b4332] text-white rounded-2xl p-5 text-center border-[#122e22] shadow-sm">
+                            <div class="text-3xl mb-1.5">📦</div>
+                            <div class="font-title text-lg font-bold">PAPEL Y CARTÓN</div>
+                            <div class="text-xs text-emerald-100/90 mt-0.5">Cajas, hojas y periódicos</div>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL DE FELICITACIÓN / RECONOCIMIENTO (SIN USAR ALERT()) -->
+    <div id="custom-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 sm:p-8 text-center border border-[#c7dcd1] shadow-2xl transform scale-100">
+            <div id="modal-emoji" class="text-5xl mb-3">🌿</div>
+            <h3 id="modal-title" class="font-title text-2xl font-bold text-slate-900 mb-2">¡Excelente trabajo!</h3>
+            <p id="modal-text" class="text-slate-600 mb-6">Has sumado puntos por tus buenas decisiones ambientales.</p>
+            <button onclick="closeModal()" class="btn-bounce w-full bg-[#1b4332] hover:bg-[#2d6a4f] text-white font-semibold py-3 rounded-xl">
+                Continuar
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- LÓGICA INTERACTIVA, SÍNTESIS DE VOZ Y EFECTOS DE SONIDO   -->
+    <!-- ========================================================= -->
+    <script>
+        // --- ESTADO GLOBAL DE LA APLICACIÓN ---
+        let ecoPoints = 0;
+        let currentSlide = 0;
+        let currentQuizIndex = 0;
+        let currentTrashIndex = 0;
+        let videoTimer = null;
+
+        // --- DATOS PEDAGÓGICOS: DIAPOSITIVAS TEÓRICAS (8-10 AÑOS) ---
+        const slidesData = [
+            {
+                emoji: "🌍✨",
+                title: "1. ¿Qué es el Medioambiente?",
+                text: "Es todo lo que nos rodea y nos permite vivir: el aire que respiramos, el agua que bebemos, los árboles, los animales y el suelo que pisamos. Todos los elementos de la naturaleza están conectados.",
+                highlight: "Idea clave: Si una parte del ecosistema se altera, los demás seres vivos también lo sienten."
+            },
+            {
+                emoji: "🏭💨",
+                title: "2. ¿Por qué nuestro planeta necesita cuidado?",
+                text: "Cuando producimos demasiada basura, dejamos luces encendidas sin usarlas o arrojamos plásticos a los ríos, contaminamos el hogar de muchas especies y aumentamos la temperatura de la Tierra.",
+                highlight: "Dato importante: Una botella de plástico puede tardar cientos de años en degradarse."
+            },
+            {
+                emoji: "🌳🌬️",
+                title: "3. Los Árboles: Pulmones del Planeta",
+                text: "Los árboles purifican el aire y producen el oxígeno fresco que necesitamos para vivir. Además, brindan refugio y alimento a miles de aves, mamíferos e insectos.",
+                highlight: "Cuidar las zonas verdes y plantar árboles fortalece la salud de todo el ecosistema."
+            },
+            {
+                emoji: "💧🐢",
+                title: "4. El Agua es un Recurso Vital",
+                text: "Aunque gran parte de la Tierra está cubierta por océanos, solo una pequeña fracción es agua dulce apta para beber. Por eso es fundamental usarla con responsabilidad todos los días.",
+                highlight: "Hábito responsable: Cierra la llave mientras te cepillas los dientes o te enjabonas las manos."
+            }
+        ];
+
+        // --- DATOS PEDAGÓGICOS: VIDEO-CUENTO ANIMADO ---
+        const videoScenes = [
+            {
+                emoji: "☁️💧",
+                bg: "from-[#3a7ca5] to-[#2f6690]",
+                text: "Había una vez una gota de agua llamada Azul que nació en una nube limpia sobre las montañas."
+            },
+            {
+                emoji: "🏞️🐟",
+                bg: "from-[#2d6a4f] to-[#1b4332]",
+                text: "Azul descendió en forma de lluvia hacia un río cristalino donde habitaban peces y plantas acuáticas."
+            },
+            {
+                emoji: "🥤⚠️",
+                bg: "from-slate-600 to-[#734820]",
+                text: "Sin embargo, al pasar cerca de la ciudad, algunos residuos plásticos contaminaron el cauce del río."
+            },
+            {
+                emoji: "🌱♻️🌈",
+                bg: "from-[#2d6a4f] to-[#2b5975]",
+                text: "Gracias a estudiantes comprometidos que limpiaron la ribera y reciclaron, el río recuperó su pureza."
+            }
+        ];
+
+        // --- DATOS PEDAGÓGICOS: MISIONES DE CONCIENCIA ---
+        const missionsData = [
+            { id: 1, icon: "🪥", text: "Cerrar la llave del agua mientras me cepillo los dientes.", done: false },
+            { id: 2, icon: "💡", text: "Apagar la luz y los aparatos electrónicos al salir de una habitación.", done: false },
+            { id: 3, icon: "🛍️", text: "Utilizar bolsas reutilizables de tela al hacer compras en familia.", done: false },
+            { id: 4, icon: "🌱", text: "Cuidar y regar las plantas de mi hogar o colegio respetando su entorno.", done: false },
+            { id: 5, icon: "🧴", text: "Llevar mi propio termo reutilizable para evitar botellas desechables.", done: false },
+            { id: 6, icon: "🗑️", text: "Guardar mis residuos hasta encontrar el contenedor correspondiente.", done: false }
+        ];
+
+        // --- DATOS PEDAGÓGICOS: PREGUNTAS DE TRIVIA ---
+        const quizQuestions = [
+            {
+                question: "¿Por qué son fundamentales los árboles para los seres vivos?",
+                options: [
+                    "Porque purifican el aire y producen oxígeno para respirar",
+                    "Porque sirven para acumular residuos debajo de ellos",
+                    "Porque consumen toda el agua dulce del planeta"
+                ],
+                correct: 0,
+                explanation: "¡Correcto! Los árboles funcionan como los pulmones de la Tierra y mantienen el aire limpio."
+            },
+            {
+                question: "Si observas una luz encendida en una habitación vacía, ¿cuál es la acción adecuada?",
+                options: [
+                    "Dejarla encendida durante todo el día",
+                    "Apagarla para ahorrar energía eléctrica",
+                    "Encender otros aparatos al mismo tiempo"
+                ],
+                correct: 1,
+                explanation: "¡Muy bien! Ahorrar electricidad reduce el impacto ambiental y conserva recursos."
+            },
+            {
+                question: "¿En qué consiste la acción de REUTILIZAR?",
+                options: [
+                    "Comprar objetos nuevos constantemente",
+                    "Desechar todos los envases después de un solo uso",
+                    "Darle una segunda vida útil a un objeto de forma creativa"
+                ],
+                correct: 2,
+                explanation: "¡Excelente! Reutilizar disminuye la cantidad de residuos que generamos."
+            },
+            {
+                question: "¿Qué consecuencia tiene arrojar plásticos o aceites en ríos y desagües?",
+                options: [
+                    "Favorece el crecimiento de los peces",
+                    "Contamina el agua y pone en riesgo a la fauna acuática",
+                    "Mejora la calidad del agua potable"
+                ],
+                correct: 1,
+                explanation: "¡Así es! Mantener las fuentes hídricas limpias protege la biodiversidad y nuestra salud."
+            },
+            {
+                question: "¿Cuál es la alternativa más sostenible para desplazarse a un lugar cercano?",
+                options: [
+                    "Caminar o utilizar la bicicleta",
+                    "Viajar en avión",
+                    "Utilizar un vehículo motorizado para trayectos muy cortos"
+                ],
+                correct: 0,
+                explanation: "¡Exacto! Caminar o usar bicicleta cuida nuestra salud y evita emisiones contaminantes."
+            }
+        ];
+
+        // --- DATOS MINIJUEGO CLASIFICADOR ---
+        const trashItems = [
+            { emoji: "🍌", name: "Cáscara de plátano", bin: "organico" },
+            { emoji: "🧴", name: "Botella de plástico vacía", bin: "plastico" },
+            { emoji: "📦", name: "Caja de cartón", bin: "papel" },
+            { emoji: "🍎", name: "Restos de manzana", bin: "organico" },
+            { emoji: "📰", name: "Periódico usado", bin: "papel" },
+            { emoji: "🥫", name: "Lata de aluminio", bin: "plastico" }
+        ];
+
+        // --- SISTEMA DE AUDIO CON TONE.JS (EFECTOS DE JUEGO) ---
+        async function playSoundEffect(type) {
+            try {
+                await Tone.start();
+                const synth = new Tone.Synth().toDestination();
+                if (type === 'click') {
+                    synth.triggerAttackRelease("C5", "16n");
+                } else if (type === 'success') {
+                    const now = Tone.now();
+                    synth.triggerAttackRelease("C5", "16n", now);
+                    synth.triggerAttackRelease("E5", "16n", now + 0.1);
+                    synth.triggerAttackRelease("G5", "8n", now + 0.2);
+                } else if (type === 'error') {
+                    synth.triggerAttackRelease("A2", "8n");
+                }
+            } catch (e) {
+                console.log("Audio esperando interacción del usuario.");
+            }
+        }
+
+        // --- NARRACIÓN POR VOZ EN ESPAÑOL (WEB SPEECH API) ---
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'es-ES';
+                utterance.rate = 0.96;
+                utterance.pitch = 1.05;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // --- NAVEGACIÓN ENTRE SECCIONES ---
+        function navigateTo(sectionId) {
+            playSoundEffect('click');
+            stopVideoStory();
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+
+            // Ocultar todas las secciones
+            document.querySelectorAll('.section-panel').forEach(sec => sec.classList.remove('active'));
+            // Mostrar la seleccionada
+            document.getElementById(`sec-${sectionId}`).classList.add('active');
+
+            // Actualizar botones del menú
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('tab-active'));
+            document.getElementById(`nav-${sectionId}`).classList.add('tab-active');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- SUMAR PUNTOS Y ACTUALIZAR MARCADOR ---
+        function addPoints(points) {
+            ecoPoints += points;
+            const display = document.getElementById('score-display');
+            display.textContent = ecoPoints;
+            display.classList.add('scale-125', 'text-[#2d6a4f]');
+            setTimeout(() => display.classList.remove('scale-125', 'text-[#2d6a4f]'), 400);
+        }
+
+        // --- MODAL PERSONALIZADO ---
+        function showModal(emoji, title, text) {
+            document.getElementById('modal-emoji').textContent = emoji;
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-text').textContent = text;
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            playSoundEffect('click');
+            document.getElementById('custom-modal').classList.add('hidden');
+        }
+
+        // --- RENDERIZADO DE DIAPOSITIVAS TEÓRICAS ---
+        function renderSlide() {
+            const slide = slidesData[currentSlide];
+            const container = document.getElementById('slide-container');
+            container.innerHTML = `
+                <div class="text-center sm:text-left flex flex-col sm:flex-row items-center gap-6">
+                    <div class="text-6xl sm:text-7xl bg-[#f4f8f6] p-6 rounded-2xl border border-[#c7dcd1] animate-float shrink-0">
+                        ${slide.emoji}
+                    </div>
+                    <div>
+                        <h3 class="font-title text-xl sm:text-2xl font-bold text-slate-900 mb-3">${slide.title}</h3>
+                        <p class="text-base sm:text-lg text-slate-700 leading-relaxed mb-4">${slide.text}</p>
+                        <div class="bg-[#f7f1e6] border-l-4 border-[#9c6615] p-3.5 rounded-r-xl text-slate-800 font-medium text-sm sm:text-base">
+                            💡 ${slide.highlight}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Actualizar puntitos
+            const dotsContainer = document.getElementById('slide-dots');
+            dotsContainer.innerHTML = slidesData.map((_, idx) => `
+                <span class="w-3 h-3 rounded-full transition-all ${idx === currentSlide ? 'bg-[#1b4332] scale-125' : 'bg-slate-300'}"></span>
+            `).join('');
+
+            // Estado botones
+            document.getElementById('btn-prev-slide').disabled = currentSlide === 0;
+            const nextBtn = document.getElementById('btn-next-slide');
+            if (currentSlide === slidesData.length - 1) {
+                nextBtn.innerHTML = `<span>Ir a Audiovisual</span> <span>🎬</span>`;
+            } else {
+                nextBtn.innerHTML = `<span>Siguiente</span> <span>→</span>`;
+            }
+        }
+
+        function changeSlide(dir) {
+            playSoundEffect('click');
+            if (dir === 1 && currentSlide === slidesData.length - 1) {
+                addPoints(10);
+                navigateTo('audiovisual');
+                return;
+            }
+            currentSlide = Math.max(0, Math.min(slidesData.length - 1, currentSlide + dir));
+            renderSlide();
+        }
+
+        function speakCurrentSlide() {
+            const slide = slidesData[currentSlide];
+            speakText(`${slide.title}. ${slide.text}. ${slide.highlight}`);
+        }
+
+        // --- VIDEO-CUENTO ANIMADO ---
+        function playVideoStory() {
+            stopVideoStory();
+            playSoundEffect('success');
+            let sceneIdx = 0;
+            const visualizer = document.getElementById('audio-visualizer');
+            visualizer.classList.remove('hidden');
+
+            function showScene(idx) {
+                if (idx >= videoScenes.length) {
+                    visualizer.classList.add('hidden');
+                    addPoints(15);
+                    showModal("🎬🌿", "¡Relato Completado!", "Has ganado 15 Eco-Puntos por completar la historia sobre el cuidado del agua.");
+                    return;
+                }
+                const scene = videoScenes[idx];
+                const stage = document.getElementById('video-stage');
+                stage.className = `relative h-64 sm:h-80 bg-gradient-to-b ${scene.bg} flex flex-col items-center justify-center p-6 text-center transition-all duration-700`;
+                document.getElementById('video-emoji').textContent = scene.emoji;
+                document.getElementById('video-subtitle').textContent = scene.text;
+                document.getElementById('video-scene-counter').textContent = `${idx + 1} / ${videoScenes.length}`;
+                
+                speakText(scene.text);
+                videoTimer = setTimeout(() => showScene(idx + 1), 6500);
+            }
+
+            showScene(sceneIdx);
+        }
+
+        function stopVideoStory() {
+            if (videoTimer) clearTimeout(videoTimer);
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            document.getElementById('audio-visualizer').classList.add('hidden');
+        }
+
+        // --- LABORATORIO DE SONIDOS DE LA NATURALEZA ---
+        async function playNatureAudio(type) {
+            await Tone.start();
+            const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+            const now = Tone.now();
+
+            if (type === 'bosque') {
+                synth.triggerAttackRelease(["E5", "G5"], "16n", now);
+                synth.triggerAttackRelease(["B5"], "16n", now + 0.15);
+                synth.triggerAttackRelease(["G5", "E5"], "8n", now + 0.35);
+                speakText("Escuchas un bosque en equilibrio: las aves cantan en un hábitat limpio y protegido.");
+            } else if (type === 'rio') {
+                ["C4", "E4", "G4", "B4", "C5", "B4", "G4"].forEach((note, i) => {
+                    synth.triggerAttackRelease(note, "16n", now + i * 0.1);
+                });
+                speakText("El agua cristalina fluye sin obstáculos, llevando vida a todo el ecosistema.");
+            } else if (type === 'ruido') {
+                synth.triggerAttackRelease(["F2", "F#2"], "4n", now);
+                synth.triggerAttackRelease(["F2", "F#2"], "4n", now + 0.35);
+                speakText("El exceso de ruido altera la tranquilidad de los animales. Caminar o usar bicicleta ayuda a reducirlo.");
+            } else if (type === 'reciclaje') {
+                ["C5", "E5", "G5", "C6"].forEach((note, i) => {
+                    synth.triggerAttackRelease(note, "16n", now + i * 0.08);
+                });
+                addPoints(5);
+                speakText("Excelente decisión. Clasificar correctamente los residuos protege nuestros recursos naturales.");
+            }
+        }
+
+        // --- LISTA DE COMPROMISOS (SECCIÓN 3) ---
+        function renderMissions() {
+            const container = document.getElementById('missions-list');
+            container.innerHTML = missionsData.map((m, idx) => `
+                <div onclick="toggleMission(${idx})" class="cursor-pointer p-4 rounded-xl border transition-all flex items-center gap-3 ${m.done ? 'bg-[#e8f0ec] border-[#2d6a4f]' : 'bg-white/95 border-slate-200 hover:border-[#2d6a4f]'}">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-sm shrink-0 ${m.done ? 'bg-[#1b4332] text-white' : 'bg-slate-50 border border-slate-300 text-transparent'}">
+                        ✓
+                    </div>
+                    <span class="text-xl">${m.icon}</span>
+                    <span class="font-medium text-sm sm:text-base ${m.done ? 'text-[#1b4332] line-through' : 'text-slate-700'}">${m.text}</span>
+                </div>
+            `).join('');
+        }
+
+        function toggleMission(idx) {
+            if (!missionsData[idx].done) {
+                missionsData[idx].done = true;
+                playSoundEffect('success');
+                addPoints(10);
+                renderMissions();
+            }
+        }
+
+        // --- TRIVIA DE PREGUNTAS (SECCIÓN 4) ---
+        function renderQuiz() {
+            const quizBox = document.getElementById('quiz-box');
+            const progress = document.getElementById('quiz-progress');
+
+            if (currentQuizIndex >= quizQuestions.length) {
+                progress.textContent = "Completado";
+                quizBox.innerHTML = `
+                    <div class="text-center py-6">
+                        <div class="text-5xl mb-3">🎓🌍</div>
+                        <h3 class="font-title text-2xl font-bold text-[#1b4332] mb-2">¡Felicitaciones, Guardián Ambiental!</h3>
+                        <p class="text-slate-600 mb-5">Has completado todas las preguntas de conciencia ecológica. Continúa aplicando estos conocimientos cada día.</p>
+                        <button onclick="resetQuiz()" class="btn-bounce bg-[#1b4332] hover:bg-[#2d6a4f] text-white font-semibold px-6 py-2.5 rounded-xl text-sm">
+                            🔄 Repetir Evaluación
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            const q = quizQuestions[currentQuizIndex];
+            progress.textContent = `Pregunta ${currentQuizIndex + 1} de ${quizQuestions.length}`;
+
+            quizBox.innerHTML = `
+                <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-4">${q.question}</h3>
+                <div class="space-y-3">
+                    ${q.options.map((opt, i) => `
+                        <button onclick="answerQuiz(${i})" class="btn-bounce w-full text-left bg-slate-50 hover:bg-[#e8f0ec] border border-slate-200 hover:border-[#2d6a4f] p-4 rounded-xl font-medium text-slate-800 transition-all flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-[#1b4332] font-bold flex items-center justify-center shrink-0 text-sm">${['A', 'B', 'C'][i]}</span>
+                            <span>${opt}</span>
+                        </button>
+                    `).join('')}
+                </div>
+                <div id="quiz-feedback" class="mt-4 hidden p-4 rounded-xl font-medium text-sm sm:text-base"></div>
+            `;
+        }
+
+        function answerQuiz(selectedIdx) {
+            const q = quizQuestions[currentQuizIndex];
+            const feedback = document.getElementById('quiz-feedback');
+            feedback.classList.remove('hidden');
+
+            if (selectedIdx === q.correct) {
+                playSoundEffect('success');
+                addPoints(20);
+                feedback.className = "mt-4 p-4 rounded-xl font-medium bg-[#e8f0ec] text-[#1b4332] border border-[#2d6a4f]";
+                feedback.innerHTML = `✅ ${q.explanation}`;
+                speakText(q.explanation);
+                setTimeout(() => {
+                    currentQuizIndex++;
+                    renderQuiz();
+                }, 2600);
+            } else {
+                playSoundEffect('error');
+                feedback.className = "mt-4 p-4 rounded-xl font-medium bg-[#f7f1e6] text-[#9c6615] border border-[#e6d5b8]";
+                feedback.innerHTML = `💡 Analiza nuevamente las opciones e intenta otra respuesta.`;
+            }
+        }
+
+        function resetQuiz() {
+            currentQuizIndex = 0;
+            renderQuiz();
+        }
+
+        // --- MINIJUEGO CLASIFICADOR DE RESIDUOS ---
+        function renderTrashItem() {
+            const item = trashItems[currentTrashIndex % trashItems.length];
+            document.getElementById('trash-emoji').textContent = item.emoji;
+            document.getElementById('trash-name').textContent = item.name;
+            const fb = document.getElementById('trash-feedback');
+            fb.textContent = "¿En qué contenedor debe depositarse?";
+            fb.className = "text-sm font-medium text-[#9c6615] mt-2 h-6";
+        }
+
+        function checkBin(selectedBin) {
+            const item = trashItems[currentTrashIndex % trashItems.length];
+            const fb = document.getElementById('trash-feedback');
+
+            if (selectedBin === item.bin) {
+                playSoundEffect('success');
+                addPoints(15);
+                fb.textContent = `✅ Correcto: ${item.name} corresponde a ese contenedor.`;
+                fb.className = "text-sm font-bold text-[#1b4332] mt-2 h-6";
+                setTimeout(() => {
+                    currentTrashIndex++;
+                    renderTrashItem();
+                }, 1300);
+            } else {
+                playSoundEffect('error');
+                fb.textContent = `⚠️ Ese no es el contenedor adecuado. Inténtalo nuevamente.`;
+                fb.className = "text-sm font-bold text-rose-700 mt-2 h-6";
+            }
+        }
+
+        // --- INICIALIZACIÓN AL CARGAR LA PÁGINA ---
+        window.onload = function() {
+            renderSlide();
+            renderMissions();
+            renderQuiz();
+            renderTrashItem();
+        };
+    </script>
+</body>
+</html>
